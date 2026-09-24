@@ -1,0 +1,1308 @@
+```html
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blackjack Royale</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #f5f1e5;
+        background:
+            radial-gradient(circle at top, #18754b 0%, #0c5a39 40%, #062f20 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .game {
+        width: 100%;
+        max-width: 900px;
+        background: rgba(0, 0, 0, 0.16);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 28px;
+        padding: 25px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+    }
+
+    /* HEADER */
+
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .logo {
+        font-size: 25px;
+        font-weight: 900;
+        letter-spacing: 3px;
+    }
+
+    .bank {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 10px 18px;
+        text-align: right;
+    }
+
+    .bank small {
+        display: block;
+        color: #b8c7bd;
+        font-size: 11px;
+        letter-spacing: 2px;
+    }
+
+    .bank span {
+        color: #e7c66a;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    /* TABLE */
+
+    .section {
+        background: rgba(0,0,0,0.13);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+
+    .title {
+        color: #b8c7bd;
+        font-size: 12px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+    }
+
+    .cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        min-height: 120px;
+    }
+
+    /* CARDS */
+
+    .card {
+        width: 82px;
+        height: 115px;
+        background: white;
+        color: #111;
+        border-radius: 12px;
+        padding: 9px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 7px 15px rgba(0,0,0,0.35);
+        animation: dealCard 0.25s ease;
+        font-weight: bold;
+    }
+
+    .card.red {
+        color: #bd3043;
+    }
+
+    .rank {
+        font-size: 22px;
+    }
+
+    .suit {
+        text-align: center;
+        font-size: 38px;
+    }
+
+    .corner {
+        text-align: right;
+        font-size: 12px;
+    }
+
+    .hidden-card {
+        background:
+            repeating-linear-gradient(
+                45deg,
+                #26354c,
+                #26354c 8px,
+                #d9b64f 9px,
+                #26354c 11px
+            );
+        border: 5px solid white;
+        color: white;
+        justify-content: center;
+        align-items: center;
+        font-size: 35px;
+    }
+
+    .score {
+        margin-top: 12px;
+        color: #e7c66a;
+        font-weight: bold;
+    }
+
+    /* MESSAGE */
+
+    .message {
+        min-height: 35px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 18px 0;
+    }
+
+    /* BET */
+
+    .bet-area {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .bet-display {
+        font-size: 25px;
+        color: #e7c66a;
+        font-weight: 900;
+        min-width: 130px;
+    }
+
+    .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 15px;
+    }
+
+    .chip {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        border: 3px dashed white;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+
+    .chip:hover {
+        transform: translateY(-4px) scale(1.05);
+    }
+
+    .chip:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    .chip-5 {
+        background: #bd3043;
+    }
+
+    .chip-25 {
+        background: #3568a8;
+    }
+
+    .chip-100 {
+        background: #292d33;
+    }
+
+    .chip-500 {
+        background: #9b4d9d;
+    }
+
+    /* BUTTONS */
+
+    .buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    button {
+        font-family: inherit;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 16px;
+        font-weight: 900;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+
+    .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    .deal-btn {
+        background: #e7c66a;
+        color: #152219;
+    }
+
+    .hit-btn {
+        background: #f1eadb;
+        color: #17251e;
+    }
+
+    .stand-btn {
+        background: #f1eadb;
+        color: #17251e;
+    }
+
+    .double-btn {
+        background: #4d9b70;
+        color: white;
+    }
+
+    .reset-btn {
+        background: #c94b4b;
+        color: white;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .hint {
+        text-align: center;
+        color: #b8c7bd;
+        font-size: 12px;
+        margin-top: 15px;
+        line-height: 1.5;
+    }
+
+    /* ANIMATION */
+
+    @keyframes dealCard {
+        from {
+            opacity: 0;
+            transform: translateY(-20px) rotate(-4deg);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) rotate(0);
+        }
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 600px) {
+
+        body {
+            padding: 10px;
+        }
+
+        .game {
+            padding: 15px;
+            border-radius: 20px;
+        }
+
+        .logo {
+            font-size: 17px;
+        }
+
+        .card {
+            width: 65px;
+            height: 95px;
+        }
+
+        .suit {
+            font-size: 30px;
+        }
+
+        .buttons {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .bet-display {
+            width: 100%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <!-- HEADER -->
+    <div class="top">
+
+        <div class="logo">
+            ♠ BLACKJACK ROYALE
+        </div>
+
+        <div class="bank">
+            <small>CHIPS</small>
+            <span id="bank">1000</span>
+        </div>
+
+    </div>
+
+
+    <!-- DEALER -->
+    <div class="section">
+
+        <div class="title">
+            Dealer
+        </div>
+
+        <div id="dealerCards" class="cards"></div>
+
+        <div id="dealerScore" class="score"></div>
+
+    </div>
+
+
+    <!-- PLAYER -->
+    <div class="section">
+
+        <div class="title">
+            Din hånd
+        </div>
+
+        <div id="playerCards" class="cards"></div>
+
+        <div id="playerScore" class="score"></div>
+
+    </div>
+
+
+    <!-- MESSAGE -->
+
+    <div id="message" class="message">
+        Velg en innsats for å starte.
+    </div>
+
+
+    <!-- BET -->
+
+    <div class="section">
+
+        <div class="title">
+            Plasser innsats
+        </div>
+
+        <div class="bet-area">
+
+            <div class="bet-display">
+                💰 <span id="bet">0</span>
+            </div>
+
+            <button class="btn" id="clearBet">
+                Nullstill
+            </button>
+
+            <button class="btn deal-btn" id="deal">
+                🎴 DEAL
+            </button>
+
+        </div>
+
+
+        <div class="chips">
+
+            <button class="chip chip-5" data-value="5">
+                5
+            </button>
+
+            <button class="chip chip-25" data-value="25">
+                25
+            </button>
+
+            <button class="chip chip-100" data-value="100">
+                100
+            </button>
+
+            <button class="chip chip-500" data-value="500">
+                500
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+
+    <div class="buttons">
+
+        <button class="btn hit-btn" id="hit" disabled>
+            HIT
+        </button>
+
+        <button class="btn stand-btn" id="stand" disabled>
+            STAND
+        </button>
+
+        <button class="btn double-btn" id="double" disabled>
+            DOUBLE
+        </button>
+
+        <button class="btn reset-btn" id="reset">
+            NY BANKROLL
+        </button>
+
+    </div>
+
+
+    <div class="hint">
+        Blackjack betaler 3:2 • Vanlig seier betaler 1:1 •
+        Dealer trekker til 17
+    </div>
+
+</div>
+
+
+<script>
+
+    // ==========================================
+    // BLACKJACK GAME
+    // ==========================================
+
+    const bankElement = document.getElementById("bank");
+    const betElement = document.getElementById("bet");
+
+    const playerCardsElement =
+        document.getElementById("playerCards");
+
+    const dealerCardsElement =
+        document.getElementById("dealerCards");
+
+    const playerScoreElement =
+        document.getElementById("playerScore");
+
+    const dealerScoreElement =
+        document.getElementById("dealerScore");
+
+    const messageElement =
+        document.getElementById("message");
+
+    const dealButton =
+        document.getElementById("deal");
+
+    const hitButton =
+        document.getElementById("hit");
+
+    const standButton =
+        document.getElementById("stand");
+
+    const doubleButton =
+        document.getElementById("double");
+
+    const clearBetButton =
+        document.getElementById("clearBet");
+
+    const resetButton =
+        document.getElementById("reset");
+
+    const chipButtons =
+        document.querySelectorAll(".chip");
+
+
+    // ==========================================
+    // GAME VARIABLES
+    // ==========================================
+
+    let bank = 1000;
+
+    let currentBet = 0;
+
+    let deck = [];
+
+    let playerHand = [];
+
+    let dealerHand = [];
+
+    let gameRunning = false;
+
+
+    // ==========================================
+    // CARD DATA
+    // ==========================================
+
+    const suits = [
+        "♠",
+        "♥",
+        "♦",
+        "♣"
+    ];
+
+    const ranks = [
+        ["2", 2],
+        ["3", 3],
+        ["4", 4],
+        ["5", 5],
+        ["6", 6],
+        ["7", 7],
+        ["8", 8],
+        ["9", 9],
+        ["10", 10],
+        ["J", 10],
+        ["Q", 10],
+        ["K", 10],
+        ["A", 11]
+    ];
+
+
+    // ==========================================
+    // CREATE DECK
+    // ==========================================
+
+    function createDeck() {
+
+        deck = [];
+
+        for (const suit of suits) {
+
+            for (const rank of ranks) {
+
+                deck.push({
+                    rank: rank[0],
+                    value: rank[1],
+                    suit: suit
+                });
+
+            }
+
+        }
+
+        shuffleDeck();
+    }
+
+
+    // ==========================================
+    // SHUFFLE
+    // ==========================================
+
+    function shuffleDeck() {
+
+        for (let i = deck.length - 1; i > 0; i--) {
+
+            const random =
+                Math.floor(Math.random() * (i + 1));
+
+            [
+                deck[i],
+                deck[random]
+            ] =
+            [
+                deck[random],
+                deck[i]
+            ];
+
+        }
+
+    }
+
+
+    // ==========================================
+    // DRAW CARD
+    // ==========================================
+
+    function drawCard() {
+
+        return deck.pop();
+
+    }
+
+
+    // ==========================================
+    // CALCULATE SCORE
+    // ==========================================
+
+    function calculateScore(hand) {
+
+        let score = 0;
+
+        let aces = 0;
+
+        for (const card of hand) {
+
+            score += card.value;
+
+            if (card.rank === "A") {
+                aces++;
+            }
+
+        }
+
+        // Turn Ace from 11 into 1
+        // if we would bust.
+
+        while (score > 21 && aces > 0) {
+
+            score -= 10;
+
+            aces--;
+
+        }
+
+        return score;
+    }
+
+
+    // ==========================================
+    // CHECK BLACKJACK
+    // ==========================================
+
+    function isBlackjack(hand) {
+
+        return (
+            hand.length === 2 &&
+            calculateScore(hand) === 21
+        );
+
+    }
+
+
+    // ==========================================
+    // CREATE CARD HTML
+    // ==========================================
+
+    function createCard(card, hidden = false) {
+
+        if (hidden) {
+
+            return `
+                <div class="card hidden-card">
+                    ★
+                </div>
+            `;
+
+        }
+
+        const red =
+            card.suit === "♥" ||
+            card.suit === "♦";
+
+        return `
+            <div class="card ${red ? "red" : ""}">
+
+                <div class="rank">
+                    ${card.rank}
+                </div>
+
+                <div class="suit">
+                    ${card.suit}
+                </div>
+
+                <div class="corner">
+                    ${card.rank}${card.suit}
+                </div>
+
+            </div>
+        `;
+
+    }
+
+
+    // ==========================================
+    // UPDATE SCREEN
+    // ==========================================
+
+    function updateScreen(hideDealer = true) {
+
+        bankElement.textContent =
+            Math.round(bank);
+
+        betElement.textContent =
+            Math.round(currentBet);
+
+
+        playerCardsElement.innerHTML =
+            playerHand
+                .map(card => createCard(card))
+                .join("");
+
+
+        dealerCardsElement.innerHTML =
+            dealerHand
+                .map((card, index) => {
+
+                    if (
+                        hideDealer &&
+                        index === 0
+                    ) {
+
+                        return createCard(card, true);
+
+                    }
+
+                    return createCard(card);
+
+                })
+                .join("");
+
+
+        if (playerHand.length > 0) {
+
+            playerScoreElement.textContent =
+                "Score: " +
+                calculateScore(playerHand);
+
+        } else {
+
+            playerScoreElement.textContent = "";
+
+        }
+
+
+        if (dealerHand.length > 0) {
+
+            if (hideDealer) {
+
+                dealerScoreElement.textContent =
+                    "Score: ?";
+
+            } else {
+
+                dealerScoreElement.textContent =
+                    "Score: " +
+                    calculateScore(dealerHand);
+
+            }
+
+        } else {
+
+            dealerScoreElement.textContent = "";
+
+        }
+
+
+        updateButtons();
+
+    }
+
+
+    // ==========================================
+    // MESSAGE
+    // ==========================================
+
+    function message(text) {
+
+        messageElement.textContent = text;
+
+    }
+
+
+    // ==========================================
+    // BUTTON STATES
+    // ==========================================
+
+    function updateButtons() {
+
+        dealButton.disabled =
+            gameRunning ||
+            currentBet <= 0 ||
+            currentBet > bank;
+
+
+        hitButton.disabled =
+            !gameRunning;
+
+
+        standButton.disabled =
+            !gameRunning;
+
+
+        doubleButton.disabled =
+            !gameRunning ||
+            playerHand.length !== 2 ||
+            currentBet > bank;
+
+
+        clearBetButton.disabled =
+            gameRunning;
+
+
+        chipButtons.forEach(chip => {
+
+            const value =
+                Number(chip.dataset.value);
+
+            chip.disabled =
+                gameRunning ||
+                currentBet + value > bank;
+
+        });
+
+    }
+
+
+    // ==========================================
+    // ADD CHIP
+    // ==========================================
+
+    chipButtons.forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            if (gameRunning) return;
+
+            const value =
+                Number(chip.dataset.value);
+
+
+            if (currentBet + value <= bank) {
+
+                currentBet += value;
+
+                updateScreen(false);
+
+            }
+
+        });
+
+    });
+
+
+    // ==========================================
+    // CLEAR BET
+    // ==========================================
+
+    clearBetButton.addEventListener(
+        "click",
+        () => {
+
+            if (gameRunning) return;
+
+            currentBet = 0;
+
+            updateScreen(false);
+
+        }
+    );
+
+
+    // ==========================================
+    // DEAL
+    // ==========================================
+
+    dealButton.addEventListener(
+        "click",
+        startGame
+    );
+
+
+    function startGame() {
+
+        if (
+            gameRunning ||
+            currentBet <= 0 ||
+            currentBet > bank
+        ) {
+            return;
+        }
+
+
+        createDeck();
+
+
+        playerHand = [
+            drawCard(),
+            drawCard()
+        ];
+
+
+        dealerHand = [
+            drawCard(),
+            drawCard()
+        ];
+
+
+        gameRunning = true;
+
+
+        updateScreen(true);
+
+
+        // Check immediate blackjack
+
+        if (
+            isBlackjack(playerHand) ||
+            isBlackjack(dealerHand)
+        ) {
+
+            finishBlackjack();
+
+            return;
+
+        }
+
+
+        message(
+            "Din tur — HIT, STAND eller DOUBLE."
+        );
+
+    }
+
+
+    // ==========================================
+    // HIT
+    // ==========================================
+
+    hitButton.addEventListener(
+        "click",
+        hit
+    );
+
+
+    function hit() {
+
+        if (!gameRunning) return;
+
+
+        playerHand.push(
+            drawCard()
+        );
+
+
+        updateScreen(true);
+
+
+        const score =
+            calculateScore(playerHand);
+
+
+        if (score > 21) {
+
+            lose();
+
+            return;
+
+        }
+
+
+        if (score === 21) {
+
+            stand();
+
+        }
+
+    }
+
+
+    // ==========================================
+    // STAND
+    // ==========================================
+
+    standButton.addEventListener(
+        "click",
+        stand
+    );
+
+
+    function stand() {
+
+        if (!gameRunning) return;
+
+
+        // Dealer draws until 17+
+
+        while (
+            calculateScore(dealerHand) < 17
+        ) {
+
+            dealerHand.push(
+                drawCard()
+            );
+
+        }
+
+
+        updateScreen(false);
+
+
+        const playerScore =
+            calculateScore(playerHand);
+
+        const dealerScore =
+            calculateScore(dealerHand);
+
+
+        if (dealerScore > 21) {
+
+            win();
+
+        }
+
+        else if (playerScore > dealerScore) {
+
+            win();
+
+        }
+
+        else if (playerScore < dealerScore) {
+
+            lose();
+
+        }
+
+        else {
+
+            push();
+
+        }
+
+    }
+
+
+    // ==========================================
+    // DOUBLE
+    // ==========================================
+
+    doubleButton.addEventListener(
+        "click",
+        doubleDown
+    );
+
+
+    function doubleDown() {
+
+        if (
+            !gameRunning ||
+            playerHand.length !== 2 ||
+            currentBet > bank
+        ) {
+            return;
+        }
+
+
+        currentBet *= 2;
+
+
+        playerHand.push(
+            drawCard()
+        );
+
+
+        updateScreen(true);
+
+
+        if (
+            calculateScore(playerHand) > 21
+        ) {
+
+            lose();
+
+            return;
+
+        }
+
+
+        stand();
+
+    }
+
+
+    // ==========================================
+    // BLACKJACK RESULT
+    // ==========================================
+
+    function finishBlackjack() {
+
+        updateScreen(false);
+
+
+        const playerBJ =
+            isBlackjack(playerHand);
+
+        const dealerBJ =
+            isBlackjack(dealerHand);
+
+
+        if (playerBJ && dealerBJ) {
+
+            push();
+
+        }
+
+        else if (playerBJ) {
+
+            // Blackjack pays 3:2
+
+            bank += currentBet * 1.5;
+
+            message(
+                "🃏 BLACKJACK! Du vinner 3:2!"
+            );
+
+            currentBet = 0;
+
+            gameRunning = false;
+
+            updateScreen(false);
+
+        }
+
+        else {
+
+            lose();
+
+        }
+
+    }
+
+
+    // ==========================================
+    // WIN
+    // ==========================================
+
+    function win() {
+
+        /*
+            The original bet is returned
+            PLUS the same amount as profit.
+
+            Example:
+
+            Bet 100
+            Win = +100
+            Total returned = 200
+        */
+
+        bank += currentBet;
+
+        message(
+            "🏆 DU VANT! +" +
+            currentBet +
+            " chips"
+        );
+
+
+        currentBet = 0;
+
+        gameRunning = false;
+
+
+        updateScreen(false);
+
+    }
+
+
+    // ==========================================
+    // LOSE
+    // ==========================================
+
+    function lose() {
+
+        /*
+            The bet was never removed from
+            the bank when placing it.
+
+            Therefore losing simply removes it.
+        */
+
+        bank -= currentBet;
+
+
+        message(
+            "💥 DU TAPTE " +
+            currentBet +
+            " CHIPS"
+        );
+
+
+        currentBet = 0;
+
+        gameRunning = false;
+
+
+        updateScreen(false);
+
+
+        if (bank <= 0) {
+
+            bank = 0;
+
+            message(
+                "💀 Du gikk tom for chips!"
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // PUSH / TIE
+    // ==========================================
+
+    function push() {
+
+        message(
+            "🤝 UAVGJORT — innsatsen er tilbake."
+        );
+
+
+        currentBet = 0;
+
+        gameRunning = false;
+
+
+        updateScreen(false);
+
+    }
+
+
+    // ==========================================
+    // RESET BANKROLL
+    // ==========================================
+
+    resetButton.addEventListener(
+        "click",
+        () => {
+
+            bank = 1000;
+
+            currentBet = 0;
+
+            playerHand = [];
+
+            dealerHand = [];
+
+            gameRunning = false;
+
+
+            message(
+                "Bankrollen er satt til 1000 chips."
+            );
+
+
+            updateScreen(false);
+
+        }
+    );
+
+
+    // ==========================================
+    // START
+    // ==========================================
+
+    updateScreen(false);
+
+</script>
+
+</body>
+</html>
+```

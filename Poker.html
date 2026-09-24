@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Poker</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle, #176b3a, #06351e);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game {
+            width: 90%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 5px;
+            text-shadow: 0 3px 10px #000;
+        }
+
+        .chips {
+            font-size: 20px;
+            margin-bottom: 25px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            min-height: 150px;
+        }
+
+        .card {
+            width: 90px;
+            height: 130px;
+            background: white;
+            color: black;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            box-shadow: 0 6px 12px #0008;
+            animation: pop 0.3s ease;
+        }
+
+        .red {
+            color: #e21d35;
+        }
+
+        .black {
+            color: #111;
+        }
+
+        .back {
+            background: linear-gradient(135deg, #222, #555);
+            color: white;
+            border: 4px solid white;
+        }
+
+        button {
+            border: none;
+            padding: 14px 25px;
+            margin: 10px 5px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .deal {
+            background: #ffd43b;
+        }
+
+        .hit {
+            background: #4dabf7;
+            color: white;
+        }
+
+        .stand {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        #message {
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 35px;
+            margin: 20px;
+        }
+
+        .section {
+            margin: 25px 0;
+        }
+
+        @keyframes pop {
+            from {
+                transform: scale(0.5) rotate(-10deg);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <h1>🃏 MINI POKER 🃏</h1>
+
+    <div class="chips">
+        💰 Chips: <span id="chips">100</span>
+    </div>
+
+    <div class="section">
+        <h2>Din hånd</h2>
+        <div id="playerCards" class="cards"></div>
+    </div>
+
+    <div class="section">
+        <h2>Dealer</h2>
+        <div id="dealerCards" class="cards"></div>
+    </div>
+
+    <div id="message">Trykk DEAL for å starte!</div>
+
+    <button class="deal" onclick="deal()">🎴 DEAL</button>
+    <button class="hit" onclick="hit()">➕ HIT</button>
+    <button class="stand" onclick="stand()">🛑 STAND</button>
+
+</div>
+
+<script>
+
+    const suits = ["♠", "♥", "♦", "♣"];
+    const values = [
+        { name: "2", value: 2 },
+        { name: "3", value: 3 },
+        { name: "4", value: 4 },
+        { name: "5", value: 5 },
+        { name: "6", value: 6 },
+        { name: "7", value: 7 },
+        { name: "8", value: 8 },
+        { name: "9", value: 9 },
+        { name: "10", value: 10 },
+        { name: "J", value: 10 },
+        { name: "Q", value: 10 },
+        { name: "K", value: 10 },
+        { name: "A", value: 11 }
+    ];
+
+    let deck = [];
+    let player = [];
+    let dealer = [];
+    let chips = 100;
+    let gameOver = true;
+
+    function createDeck() {
+        deck = [];
+
+        for (let suit of suits) {
+            for (let value of values) {
+                deck.push({
+                    name: value.name,
+                    value: value.value,
+                    suit: suit
+                });
+            }
+        }
+
+        deck.sort(() => Math.random() - 0.5);
+    }
+
+    function drawCard() {
+        return deck.pop();
+    }
+
+    function deal() {
+
+        if (!gameOver) {
+            message("Du spiller allerede!");
+            return;
+        }
+
+        if (chips <= 0) {
+            message("💀 Du er tom for chips!");
+            return;
+        }
+
+        createDeck();
+
+        player = [drawCard(), drawCard()];
+        dealer = [drawCard(), drawCard()];
+
+        gameOver = false;
+
+        showCards();
+
+        message("Din tur! HIT eller STAND?");
+    }
+
+    function hit() {
+
+        if (gameOver) {
+            message("Trykk DEAL først!");
+            return;
+        }
+
+        player.push(drawCard());
+
+        showCards();
+
+        if (getScore(player) > 21) {
+            message("💥 BUST! Du tapte.");
+            chips -= 10;
+            endGame();
+        }
+    }
+
+    function stand() {
+
+        if (gameOver) {
+            message("Trykk DEAL først!");
+            return;
+        }
+
+        while (getScore(dealer) < 17) {
+            dealer.push(drawCard());
+        }
+
+        showCards();
+
+        let playerScore = getScore(player);
+        let dealerScore = getScore(dealer);
+
+        if (dealerScore > 21) {
+            message("🎉 Dealer bustet! Du vant!");
+            chips += 20;
+        }
+
+        else if (playerScore > dealerScore) {
+            message("🏆 DU VANT!");
+            chips += 20;
+        }
+
+        else if (playerScore < dealerScore) {
+            message("😢 Dealer vant.");
+            chips -= 10;
+        }
+
+        else {
+            message("🤝 Uavgjort!");
+        }
+
+        endGame();
+    }
+
+    function getScore(hand) {
+
+        let score = 0;
+        let aces = 0;
+
+        for (let card of hand) {
+            score += card.value;
+
+            if (card.name === "A") {
+                aces++;
+            }
+        }
+
+        while (score > 21 && aces > 0) {
+            score -= 10;
+            aces--;
+        }
+
+        return score;
+    }
+
+    function createCard(card, hidden = false) {
+
+        if (hidden) {
+            return `<div class="card back">🂠</div>`;
+        }
+
+        let color =
+            card.suit === "♥" || card.suit === "♦"
+            ? "red"
+            : "black";
+
+        return `
+            <div class="card ${color}">
+                <div>${card.name}</div>
+                <div>${card.suit}</div>
+            </div>
+        `;
+    }
+
+    function showCards() {
+
+        document.getElementById("playerCards").innerHTML =
+            player.map(card => createCard(card)).join("");
+
+        document.getElementById("dealerCards").innerHTML =
+            dealer.map((card, index) =>
+                createCard(card, !gameOver && index === 0)
+            ).join("");
+
+        document.getElementById("chips").textContent = chips;
+    }
+
+    function message(text) {
+        document.getElementById("message").textContent = text;
+    }
+
+    function endGame() {
+        gameOver = true;
+        showCards();
+
+        if (chips <= 0) {
+            message("💀 Game over! Du gikk tom for chips.");
+        }
+    }
+
+</script>
+
+</body>
+</html>
